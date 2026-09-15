@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aaron + Blake · Gender Reveal</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #f3f0ea; color: #111;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: #111; text-decoration: none; }
+
+  /* Router: only the section matching the current hash is shown. */
+  .view { display: none; }
+  body[data-page="home"]  #view-home,
+  body[data-page="left"]  #view-left,
+  body[data-page="right"] #view-right { display: block; }
+
+  /* ---------- Home ---------- */
+  .home {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    background: #f3f0ea;
+  }
+  .home-inner {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 96px 24px 120px;
+    gap: 22px;
+  }
+  .eyebrow {
+    font-size: 13px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 600; color: #555;
+  }
+  .home h1 {
+    margin: 0; font-weight: 700;
+    font-size: clamp(56px, 9vw, 120px);
+    line-height: 0.95; letter-spacing: -0.03em;
+  }
+  .home h1 .or {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic; font-weight: 400;
+  }
+  .home p {
+    margin: 0; max-width: 440px;
+    font-size: 18px; line-height: 1.55; color: #444;
+    text-wrap: pretty;
+  }
+  .btns {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    justify-content: center; margin-top: 18px;
+  }
+  .pill {
+    display: flex; align-items: center; gap: 12px;
+    padding: 20px 32px; border-radius: 999px;
+    font-weight: 700; font-size: 18px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .pill:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.14); }
+  .pill:active { transform: translateY(0); }
+  .pill-solid { background: #111; color: #f3f0ea; }
+  .pill-outline { border: 1.5px solid #111; color: #111; }
+
+  /* ---------- Video stage (left / right) ---------- */
+  .stage {
+    position: fixed; inset: 0;
+    background: #111;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stage video {
+    width: 100vw; height: 100vh;
+    object-fit: contain; display: block; background: #111;
+  }
+  .play {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px; height: 120px; border-radius: 999px;
+    background: #f3f0ea; border: 0; cursor: pointer;
+    font-family: 'Manrope', sans-serif; font-weight: 700;
+    font-size: 16px; color: #111;
+    transition: transform 0.12s ease;
+  }
+  .play:hover { transform: translate(-50%, -50%) scale(1.05); }
+  .back {
+    position: absolute; top: 20px; left: 20px;
+    padding: 10px 18px; border-radius: 999px;
+    background: #f3f0ea; color: #111;
+    font-weight: 600; font-size: 14px;
+  }
+</style>
+</head>
+
+<body data-page="home">
+
+  <!-- Home -->
+  <section id="view-home" class="view">
+    <div class="home">
+      <div class="home-inner">
+        <div class="eyebrow">Aaron + Blake · Gender Reveal</div>
+        <h1>Boy <span class="or">or</span> girl?</h1>
+        <p>Pick a side. One of these two paths reveals the answer.</p>
+        <div class="btns">
+          <a href="#left" class="pill pill-solid">&larr; Go left</a>
+          <a href="#right" class="pill pill-outline">Go right &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Left -->
+  <section id="view-left" class="view">
+    <div class="stage">
+      <video id="left-vid" src="videos/left.mp4" playsinline preload="metadata"></video>
+      <button class="play" data-play="left-vid">Play</button>
+      <a href="#" class="back">&larr; Back</a>
+    </div>
+  </section>
+
+  <!-- Right -->
+  <section id="view-right" class="view">
+    <div class="stage">
+      <video id="right-vid" src="videos/right.mp4" playsinline preload="metadata"></video>
+      <button class="play" data-play="right-vid">Play</button>
+      <a href="#" class="back">&larr; Back</a>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      var body = document.body;
+
+      function currentPage() {
+        var h = (location.hash || '').slice(1);
+        return (h === 'left' || h === 'right') ? h : 'home';
+      }
+
+      // Pause + reset every video, then show its Play button again.
+      function resetVideos() {
+        document.querySelectorAll('video').forEach(function (v) {
+          v.pause();
+          try { v.currentTime = 0; } catch (e) {}
+        });
+        document.querySelectorAll('.play').forEach(function (b) {
+          b.style.display = '';
+        });
+      }
+
+      function route() {
+        resetVideos();
+        body.setAttribute('data-page', currentPage());
+      }
+
+      // Play buttons start the matching video.
+      document.querySelectorAll('.play').forEach(function (btn) {
+        var vid = document.getElementById(btn.getAttribute('data-play'));
+        btn.addEventListener('click', function () {
+          vid.play();
+          btn.style.display = 'none';
+        });
+        // Clicking the playing video pauses it; Play reappears.
+        vid.addEventListener('click', function () {
+          if (vid.paused) { vid.play(); btn.style.display = 'none'; }
+          else { vid.pause(); btn.style.display = ''; }
+        });
+        // When it finishes, offer Play again.
+        vid.addEventListener('ended', function () { btn.style.display = ''; });
+      });
+
+      window.addEventListener('hashchange', route);
+      route();
+    })();
+  </script>
+
+</body>
+</html>
